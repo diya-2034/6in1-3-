@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6 in 1 Tool</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .uploader {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .input-wrapper {
+      background: #fff;
+      border: 2px dashed #ccc;
+      padding: 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      position: relative;
+    }
+    .input-wrapper:hover {
+      background: #e8f0fe;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .filename {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    button {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background: #0066ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>6 in 1 Tool</h1>
+  <div class="uploader">
+    <label class="input-wrapper">Input Image A<input type="file" accept="image/*" id="inputA" onchange="showFileName(this)"><div id="nameA" class="filename"></div></label>
+    <label class="input-wrapper">Input Image B<input type="file" accept="image/*" id="inputB" onchange="showFileName(this)"><div id="nameB" class="filename"></div></label>
+    <label class="input-wrapper">Input Image C<input type="file" accept="image/*" id="inputC" onchange="showFileName(this)"><div id="nameC" class="filename"></div></label>
+    <label class="input-wrapper">Input Image D<input type="file" accept="image/*" id="inputD" onchange="showFileName(this)"><div id="nameD" class="filename"></div></label>
+    <label class="input-wrapper">Input Image E<input type="file" accept="image/*" id="inputE" onchange="showFileName(this)"><div id="nameE" class="filename"></div></label>
+    <label class="input-wrapper">Input Image F<input type="file" accept="image/*" id="inputF" onchange="showFileName(this)"><div id="nameF" class="filename"></div></label>
+  </div>
+  <button onclick="processImages()">CONVERT</button>
+  <canvas id="canvas"></canvas>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const mmToPx = mm => mm * 3.7795275591;
+    const A3_WIDTH = mmToPx(420); // landscape
+    const A3_HEIGHT = mmToPx(297);
+    const CELL_SIZE = mmToPx(35);
+
+    const mappings = [
+      [1, 4, 'A9', 180], [2, 2, 'E7', 180], [2, 3, 'B9', 180], [2, 4, 'C9', 180], [2, 5, 'D7', 180],
+      [2, 6, 'B8', 90], [2, 7, 'F6', 0], [2, 10, 'C4', 180], [3, 3, 'F7', 90], [3, 4, 'A6', 0],
+      [3, 7, 'E9', 0], [3, 8, 'D8', 0], [3, 9, 'B4', 90], [3, 10, 'F3', 0], [4, 3, 'B6', 180],
+      [4, 4, 'E4', 180], [4, 5, 'B5', 180], [4, 6, 'C6', 180], [4, 7, 'D5', 180], [4, 8, 'A4', 90],
+      [4, 9, 'C7', 90], [4, 10, 'E6', 0], [5, 1, 'A8', -90], [5, 2, 'E5', 90], [5, 3, 'F8', 90],
+      [5, 4, 'C5', -90], [5, 5, 'F4', 90], [5, 8, 'A2', 180], [5, 9, 'D9', 90], [5, 10, 'A1', 180],
+      [5, 11, 'D6', 90], [6, 1, 'D4', 180], [6, 2, 'E3', 180], [6, 3, 'B3', 180], [6, 4, 'E2', 180],
+      [6, 5, 'B2', 180], [6, 6, 'E1', 180], [6, 7, 'B1', 180], [6, 9, 'C8', 90], [6, 10, 'F2', -90],
+      [7, 3, 'F9', 90], [7, 4, 'C1', -90], [7, 5, 'F5', 90], [7, 6, 'C2', -90], [7, 7, 'F1', 90],
+      [7, 8, 'C3', -90], [7, 10, 'B7', 0], [7, 11, 'E8', 0], [8, 4, 'D1', -90], [8, 5, 'A7', 0],
+      [8, 6, 'D2', -90], [8, 7, 'A5', 0], [8, 8, 'D3', -90], [8, 9, 'A3', 0]
+    ];
+
+    const images = {};
+
+    function showFileName(input) {
+      const id = input.id;
+      const nameBox = document.getElementById("name" + id.charAt(id.length - 1));
+      if (input.files[0]) {
+        nameBox.textContent = input.files[0].name;
+      }
+    }
+
+    async function loadAndDivideImage(file, label) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const squareSize = mmToPx(105);
+          const canvas = document.createElement('canvas');
+          canvas.width = squareSize;
+          canvas.height = squareSize;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, squareSize, squareSize);
+
+          const parts = {};
+          const cell = mmToPx(35);
+          let count = 1;
+          for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++) {
+              const temp = document.createElement('canvas');
+              temp.width = cell;
+              temp.height = cell;
+              temp.getContext('2d').drawImage(canvas, x * cell, y * cell, cell, cell, 0, 0, cell, cell);
+              parts[label + count] = temp;
+              count++;
+            }
+          }
+          resolve(parts);
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    async function processImages() {
+      const inputIds = ['A', 'B', 'C', 'D', 'E', 'F'];
+      const fileInputs = inputIds.map(id => document.getElementById('input' + id).files[0]);
+      if (fileInputs.some(f => !f)) return alert('Please upload all 6 images.');
+
+      for (let i = 0; i < inputIds.length; i++) {
+        const label = inputIds[i];
+        const parts = await loadAndDivideImage(fileInputs[i], label);
+        Object.assign(images, parts);
+      }
+
+      drawGridAndExport();
+    }
+
+    function drawGridAndExport() {
+      const canvas = document.getElementById('canvas');
+      canvas.width = A3_WIDTH;
+      canvas.height = A3_HEIGHT;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (const [row, col, key, rotation] of mappings) {
+        const img = images[key];
+        const x = (col - 1) * CELL_SIZE + (canvas.width - CELL_SIZE * 11) / 2;
+        const y = (row - 1) * CELL_SIZE + (canvas.height - CELL_SIZE * 8) / 2;
+        ctx.save();
+        ctx.translate(x + CELL_SIZE / 2, y + CELL_SIZE / 2);
+        ctx.rotate((rotation * Math.PI) / 180);
+        ctx.drawImage(img, -CELL_SIZE / 2, -CELL_SIZE / 2, CELL_SIZE, CELL_SIZE);
+        ctx.restore();
+      }
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+      pdf.addImage(dataUrl, 'JPEG', 0, 0, 420, 297);
+      pdf.save('output.pdf');
+    }
+  </script>
+</body>
+</html>
