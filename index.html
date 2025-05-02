@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,6 +68,7 @@
     <label class="input-wrapper">Input Image D<input type="file" accept="image/*" id="inputD" onchange="showFileName(this)"><div id="nameD" class="filename"></div></label>
     <label class="input-wrapper">Input Image E<input type="file" accept="image/*" id="inputE" onchange="showFileName(this)"><div id="nameE" class="filename"></div></label>
     <label class="input-wrapper">Input Image F<input type="file" accept="image/*" id="inputF" onchange="showFileName(this)"><div id="nameF" class="filename"></div></label>
+    <label class="input-wrapper">Outline Image<input type="file" accept="image/png" id="inputOutline" onchange="showFileName(this)"><div id="nameOutline" class="filename"></div></label>
   </div>
   <button onclick="processImages()">CONVERT</button>
   <canvas id="canvas"></canvas>
@@ -95,7 +97,7 @@
 
     function showFileName(input) {
       const id = input.id;
-      const nameBox = document.getElementById("name" + id.charAt(id.length - 1));
+      const nameBox = document.getElementById("name" + id.replace("input", ""));
       if (input.files[0]) {
         nameBox.textContent = input.files[0].name;
       }
@@ -134,7 +136,11 @@
     async function processImages() {
       const inputIds = ['A', 'B', 'C', 'D', 'E', 'F'];
       const fileInputs = inputIds.map(id => document.getElementById('input' + id).files[0]);
-      if (fileInputs.some(f => !f)) return alert('Please upload all 6 images.');
+      const outlineFile = document.getElementById('inputOutline').files[0];
+
+      if (fileInputs.some(f => !f) || !outlineFile) {
+        return alert('Please upload all 6 images and the outline image.');
+      }
 
       for (let i = 0; i < inputIds.length; i++) {
         const label = inputIds[i];
@@ -142,10 +148,16 @@
         Object.assign(images, parts);
       }
 
-      drawGridAndExport();
+      const outlineImg = await new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.src = URL.createObjectURL(outlineFile);
+      });
+
+      drawGridAndExport(outlineImg);
     }
 
-    function drawGridAndExport() {
+    function drawGridAndExport(outlineImg) {
       const canvas = document.getElementById('canvas');
       canvas.width = A3_WIDTH;
       canvas.height = A3_HEIGHT;
@@ -164,6 +176,9 @@
         ctx.restore();
       }
 
+      // Draw the outline overlay
+      ctx.drawImage(outlineImg, 0, 0, canvas.width, canvas.height);
+
       const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
@@ -172,4 +187,4 @@
     }
   </script>
 </body>
-</html>
+</html> 
