@@ -57,20 +57,37 @@
     canvas {
       display: none;
     }
+    .download-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .download-btn:hover {
+      background: #218838;
+    }
+
   </style>
 </head>
 <body>
-  <h1>6 in 1 Tool</h1>
+  <h1>6 in 1 Cube Generator</h1>
   <div class="uploader">
-    <label class="input-wrapper">Input Image A<input type="file" accept="image/*" id="inputA" onchange="showFileName(this)"><div id="nameA" class="filename"></div></label>
-    <label class="input-wrapper">Input Image B<input type="file" accept="image/*" id="inputB" onchange="showFileName(this)"><div id="nameB" class="filename"></div></label>
-    <label class="input-wrapper">Input Image C<input type="file" accept="image/*" id="inputC" onchange="showFileName(this)"><div id="nameC" class="filename"></div></label>
-    <label class="input-wrapper">Input Image D<input type="file" accept="image/*" id="inputD" onchange="showFileName(this)"><div id="nameD" class="filename"></div></label>
-    <label class="input-wrapper">Input Image E<input type="file" accept="image/*" id="inputE" onchange="showFileName(this)"><div id="nameE" class="filename"></div></label>
-    <label class="input-wrapper">Input Image F<input type="file" accept="image/*" id="inputF" onchange="showFileName(this)"><div id="nameF" class="filename"></div></label>
-    <label class="input-wrapper">Outline Image<input type="file" accept="image/png" id="inputOutline" onchange="showFileName(this)"><div id="nameOutline" class="filename"></div></label>
+    <label class="input-wrapper">Upload Top Image<input type="file" accept="image/*" id="inputA" onchange="showFileName(this)"><div id="nameA" class="filename"></div></label>
+    <label class="input-wrapper">Upload Front Image<input type="file" accept="image/*" id="inputB" onchange="showFileName(this)"><div id="nameB" class="filename"></div></label>
+    <label class="input-wrapper">Upload Right Image<input type="file" accept="image/*" id="inputC" onchange="showFileName(this)"><div id="nameC" class="filename"></div></label>
+    <label class="input-wrapper">Upload Bottom Image<input type="file" accept="image/*" id="inputF" onchange="showFileName(this)"><div id="nameF" class="filename"></div></label>   
+    <label class="input-wrapper">Upload Back Image<input type="file" accept="image/*" id="inputD" onchange="showFileName(this)"><div id="nameD" class="filename"></div></label>
+    <label class="input-wrapper">Upload Left Image<input type="file" accept="image/*" id="inputE" onchange="showFileName(this)"><div id="nameE" class="filename"></div></label>
+    <a href="https://drive.google.com/file/d/17znIhQnpbj9FhKrGJgGSHTbTpTXGFQRa/view?usp=sharing" target="_blank" class="download-btn">Download Cutting Template</a>
+    <label class="input-wrapper">Upload Cutting Template<input type="file" accept="image/png" id="inputOutline" onchange="showFileName(this)"><div id="nameOutline" class="filename"></div></label>
+
   </div>
-  <button onclick="processImages()">CONVERT</button>
+  <button onclick="processImages()">GENERATE</button>
   <canvas id="canvas"></canvas>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
