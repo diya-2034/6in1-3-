@@ -71,11 +71,69 @@
     .download-btn:hover {
       background: #218838;
     }
+    .instructions {
+      background: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      margin: 2rem auto;
+    }
+
+    .instructions-container {
+      text-align: left;
+    }
+
+    .instructions h2 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .instructions-list {
+      font-size: 1.2rem;
+      color: #555;
+      line-height: 1.8;
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+
+    .instructions-list li {
+      margin-bottom: 1rem;
+    }
+
+    .instructions-list li::marker {
+      color: #0066ff; /* Custom marker color */
+    }
+
+    .instructions-container a {
+      font-size: 1rem;
+      color: #0066ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .instructions-container a:hover {
+      text-decoration: underline;
+    }
 
   </style>
 </head>
 <body>
-  <h1>6 in 1 Cube Generator</h1>
+  
+  <div class="instructions">
+    <div class="instructions-container">
+      <h1>6 in 1 Cube Generator</h1>
+      <h2>Instructions</h2>
+      <ul class="instructions-list">
+        <li>First, upload all 6 images (Top, Bottom, Front, Back, Right,  Left) one by one.</li>
+        <li>Next, download the cutting template from the provided link.</li>
+        <li>Upload the cutting template image to complete the process.</li>
+        <li>Click the 'GENERATE' button to download the Printing Template PDF.</li>
+      </ul>
+    </div>
+  </div>
+  
   <div class="uploader">
     <label class="input-wrapper">Upload Top Image<input type="file" accept="image/*" id="inputA" onchange="showFileName(this)"><div id="nameA" class="filename"></div></label>
     <label class="input-wrapper">Upload Front Image<input type="file" accept="image/*" id="inputB" onchange="showFileName(this)"><div id="nameB" class="filename"></div></label>
@@ -205,3 +263,4 @@
   </script>
 </body>
 </html> 
+
